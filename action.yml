@@ -1,0 +1,55 @@
+name: Set up Limen
+description: Install the Limen CLI, verified against the release checksums and provenance, and optionally log the job in as a bot with its GitHub OIDC token. No stored secret.
+author: limen-dev
+branding:
+  icon: lock
+  color: gray-dark
+
+inputs:
+  version:
+    description: >-
+      The Limen release to install, for example v0.1.0. Pin one. "latest" means the newest
+      stable release (not a release candidate) and changes under you.
+    required: false
+    default: latest
+  proxy:
+    description: >-
+      The Limen proxy to log in to, as host:port, for example limen.example.com:443. Leave it
+      empty to only install the CLI.
+    required: false
+    default: ""
+  bot-name:
+    description: Which bot to log in as, if more than one bot rule could match this job's token.
+    required: false
+    default: ""
+  audience:
+    description: The audience to ask GitHub for. Leave it empty for the one the control plane expects.
+    required: false
+    default: ""
+  ca-file:
+    description: A PEM file with the CA to trust for the proxy, for a deployment that uses a private CA.
+    required: false
+    default: ""
+  verify-attestation:
+    description: >-
+      Check the release's build provenance with `gh attestation verify`, on top of the
+      checksum. Fails if the GitHub CLI is missing. Turn it off only on runners without gh.
+    required: false
+    default: "true"
+  github-token:
+    description: Token for the GitHub API (resolving "latest" and verifying provenance). It needs no permissions.
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  version:
+    description: The Limen release that was installed, for example v0.1.0.
+  path:
+    description: The directory that holds the limen binary (already on PATH).
+  logged-in:
+    description: '"true" if the job logged in as a bot.'
+
+runs:
+  using: node24
+  main: src/main.mjs
+  post: src/post.mjs
