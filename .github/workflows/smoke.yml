@@ -1,0 +1,46 @@
+name: smoke
+
+# Runs the action itself against a published Limen release on real runners. Run it by hand before
+# tagging a release of this action, and after a Limen release that changes the CLI's archive.
+# It installs only: the bot login needs a Limen control plane that GitHub's runners can reach.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The Limen release to install, for example v0.1.0
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    name: Install (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-latest, macos-15-intel]
+    steps:
+      - name: Check out the action
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Limen
+        id: limen
+        uses: ./
+        with:
+          version: ${{ inputs.version }}
+
+      - name: The CLI runs and is the version asked for
+        env:
+          WANT: ${{ steps.limen.outputs.version }}
+        run: |
+          set -euo pipefail
+          got="$(limen --version)"
+          echo "$got"
+          [ "$got" = "limen ${WANT#v}" ]
+          test "$(command -v limen)" = "${{ steps.limen.outputs.path }}/limen"
