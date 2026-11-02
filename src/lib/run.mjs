@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import { join } from "node:path";
 
@@ -57,7 +57,6 @@ export async function main(env, deps = {}) {
   if (!args) return;
 
   // Credentials go in a private directory that the post step deletes, not the runner's home.
-  await mkdir(tempRoot, { recursive: true });
   const home = await mkdtemp(join(tempRoot, "limen-home-"));
   saveState(env, "bin", installed.bin);
   saveState(env, "home", home);

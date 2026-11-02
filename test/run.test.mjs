@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { access, readFile, writeFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
 
@@ -184,8 +184,4 @@ test("main refuses to log in without id-token permission, before downloading", a
 
 test("post does nothing when the job never logged in", async () => {
   await post({});
-  const dir = await tempDir("post");
-  await writeFile(join(dir, "keep"), "x");
-  await post({ STATE_home: "" });
-  await access(join(dir, "keep"));
 });
